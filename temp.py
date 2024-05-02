@@ -8,7 +8,7 @@ def get_imdb_link(title):
     return mp.get_imdb_link_from_title(title)
 
 # Read the CSV file into a DataFrame
-df = pd.read_csv('Out_60.csv', lineterminator='\n')
+df = pd.read_csv('CSVs_files/Out_60.csv', lineterminator='\n')
 
 # Define the number of concurrent threads
 num_threads = 10
