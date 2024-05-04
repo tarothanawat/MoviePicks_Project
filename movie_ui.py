@@ -14,6 +14,16 @@ class MainApplication(tk.Tk):
 
         self.init_frames()
         self.populate_dropdowns()
+        self.init_components()
+
+    def init_components(self):
+        menu_bar = tk.Menu(self)
+        self.config(menu=menu_bar)
+
+        file_menu = tk.Menu(menu_bar, tearoff=False)
+        file_menu.add_command(label="Exit", command=self.quit)
+
+        menu_bar.add_cascade(label="File", menu=file_menu)
 
     def init_frames(self):
         self.notebook = ttk.Notebook(self)

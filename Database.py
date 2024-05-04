@@ -37,8 +37,5 @@ class MovieDB:
 
 
 
-
-
-
 if __name__ == '__main__':
     movie_db = MovieDB()
