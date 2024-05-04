@@ -59,7 +59,7 @@ class StorytellingGraph:
         text_widget.pack()
 
         # Create a figure and subplot for the scatter plot
-        fig = Figure(figsize=(5, 4))
+        fig = Figure(figsize=(10, 6))
         ax = fig.add_subplot(111)
 
         # Plot the scatter plot on the subplot
@@ -79,7 +79,7 @@ class StorytellingGraph:
 
     def get_histogram(self, root):
         frame = tk.Frame(root)
-        fig = Figure(figsize=(10, 4))
+        fig = Figure(figsize=(10, 6))
 
         # Add first subplot for the revenue histogram
         ax1 = fig.add_subplot(121)

@@ -1,2 +1,5 @@
-matplotlib
-seaborn
+pandas==2.2.1
+seaborn==0.13.2
+numpy==1.26.4
+matplotlib==3.8.3
+movieposters==0.0.7

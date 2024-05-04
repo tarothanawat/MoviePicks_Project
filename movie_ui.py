@@ -10,7 +10,7 @@ class MainApplication(tk.Tk):
         self.title("Movie picks application")
         self.movie_db = MovieDB()
         self.df = self.movie_db.get_orig_df()
-        self.minsize(800, 600)
+        # self.minsize(800, 600)
 
         self.init_frames()
         self.populate_dropdowns()
@@ -53,7 +53,6 @@ class DataStorytellingPage(tk.Frame):
         self.label.pack(pady=20)
         self.init_components()
         self.storytelling_manager = StorytellingGraph()
-
 
         self.current_canvas = None
 
@@ -101,8 +100,7 @@ class DataStorytellingPage(tk.Frame):
 
         elif selected_story == "Trend of revenue over the years":
             self.current_canvas = self.storytelling_manager.get_trend(self)
-        self.current_canvas.pack()
-
+        self.current_canvas.pack(pady=5)
 
 
 class DataExplorationPage(tk.Frame):
