@@ -11,7 +11,7 @@ def csv_loader(folder, csv_name):
 
 class MovieDB:
     def __init__(self):
-        self.orig_df = csv_loader(os.getcwd(), 'orig_movie_with_links.csv')
+        self.orig_df = csv_loader(os.getcwd(), 'movies_with_links.csv')
         self.orig_df['release_date'] = pd.to_datetime(self.orig_df['release_date'])
 
     def get_orig_df(self):
