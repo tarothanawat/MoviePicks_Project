@@ -1,15 +1,17 @@
 import pandas as pd
 import os
 
+
 def csv_loader(folder, csv_name):
     current_dir = os.getcwd()
     path = os.path.join(current_dir,folder,csv_name)
     data = pd.read_csv(path)
     return data
 
+
 class MovieDB:
     def __init__(self):
-        self.orig_df = csv_loader(os.getcwd(), 'movies.csv')
+        self.orig_df = csv_loader(os.getcwd(), 'orig_movie_with_links.csv')
         self.orig_df['release_date'] = pd.to_datetime(self.orig_df['release_date'])
 
     def get_orig_df(self):
@@ -25,13 +27,13 @@ class MovieDB:
         no_zeros = df.loc[(df['revenue'] != 0) & (df['budget'] != 0)]
         return no_zeros
 
-    def filter_by_language(self, df, lang):
-        df_by_lang = df[df['original_language'] == lang]
-        return df_by_lang
+    def filter_by_attribute(self, df, key, value):
+        filtered = df[df[key] == value]
+        return filtered
 
     def storytelling(self, df, lang):
         # df_no_zeros = self.get_df_no_zero(df)
-        df_by_lang = self.filter_by_language(df, lang)
+        df_by_lang = self.filter_by_attribute(df, 'original_language',lang)
         df_sep_genre = self.get_separated_genres(df_by_lang)
         return df_by_lang, df_sep_genre
 

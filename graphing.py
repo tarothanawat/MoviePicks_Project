@@ -2,10 +2,12 @@ import matplotlib as plt
 from Database import MovieDB
 plt.use("TkAgg")
 import tkinter as tk
+from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import seaborn as sns
 from matplotlib.figure import Figure
 import pandas as pd
+
 
 
 class StorytellingGraph:
@@ -134,7 +136,6 @@ class StorytellingGraph:
 
     def get_trend(self, root):
         frame = tk.Frame(root)
-
         # Create a new figure
         fig = Figure(figsize=(12, 6))
         ax = fig.add_subplot(111)
