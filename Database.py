@@ -14,6 +14,7 @@ class MovieDB:
         self.orig_df = csv_loader(os.getcwd(), 'movies_with_links.csv')
         self.orig_df['release_date'] = pd.to_datetime(self.orig_df['release_date'])
 
+
     def get_orig_df(self):
         return self.orig_df
 
@@ -22,6 +23,12 @@ class MovieDB:
         df_sep_genres = df.explode('genres')
         df_sep_genres.reset_index(drop=True, inplace=True)
         return df_sep_genres
+
+    # def get_separated_genres(self, df):
+    #     df.loc[:, 'genres'] = df['genres'].apply(lambda x: eval(x))
+    #     df_sep_genres = df.explode('genres')
+    #     df_sep_genres.reset_index(drop=True, inplace=True)
+    #     return df_sep_genres
 
     def get_df_no_zero(self,df):
         no_zeros = df.loc[(df['revenue'] != 0) & (df['budget'] != 0)]
