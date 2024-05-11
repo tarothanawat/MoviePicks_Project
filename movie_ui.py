@@ -51,11 +51,51 @@ class MainApplication(tk.Tk):
 class SearchPage(tk.Frame):
     def __init__(self, parent, df, db):
         super().__init__(parent)
-        self.label = ttk.Label(self, text="Search Page")
-        self.label.pack(pady=20)
         self.df = df
         self.db = db
+        self.configure(bg='white')
+        self.init_components()
 
+    def init_components(self):
+        self.font_small = ('Arial', 12)
+        self.font_head = ('Arial', 14)
+        self.options = {'padx': 5, 'pady': 0}
+        self.top_frame = ttk.Frame(self, )
+        self.filters_frame = ttk.Frame(self, )
+        self.results_frame = ttk.Frame(self, relief=tk.RAISED, borderwidth=1)
+
+        self.label_1 = ttk.Label(self.top_frame, text='Search for a movie: ', font=self.font_head)
+
+        # TOP
+        self.search_input = tk.StringVar()
+        self.search_bar = ttk.Entry(self.top_frame, textvariable=self.search_input, font=self.font_head, width=40)
+        self.search_button = ttk.Button(self.top_frame, text='Search', )
+        # TOP grid
+        self.label_1.grid(row=0, column=0, padx=5, pady=5)
+        self.search_bar.grid(row=0, column=1, padx=5, pady=5)
+        self.search_button.grid(row=0, column=2, padx=5, pady=5)
+
+        # Filter frame
+        self.label_filter = ttk.Label(self.filters_frame, text='Filters', font=self.font_head)
+        self.label_release_year = ttk.Label(self.filters_frame, text='Release Year Range:', font=self.font_small)
+        self.release_year_from = ttk.Entry(self.filters_frame, font=self.font_small, width=5)
+        self.label_to = ttk.Label(self.filters_frame, text='to', font=self.font_small)
+        self.release_year_to = ttk.Entry(self.filters_frame, font=self.font_small, width=5)
+
+        # Filters grid
+        self.label_filter.grid(row=0, column=0, columnspan=3, sticky=tk.W, **self.options)
+        self.label_release_year.grid(row=1, column=0, **self.options)
+        self.release_year_from.grid(row=1, column=1, **self.options)
+        self.label_to.grid(row=1, column=2, **self.options)
+        self.release_year_to.grid(row=1, column=3, **self.options)
+
+        self.top_frame.grid(column=0, row=0, sticky='ew', **self.options)
+        self.filters_frame.grid(column=0, row=1, sticky='ew', **self.options)
+        self.results_frame.grid(column=1, row=1, sticky='ew', **self.options)
+
+        # Configure grid row and column weights
+        self.rowconfigure(0, weight=1)  # Top frame row
+        self.rowconfigure(1, weight=1)  # Filters frame row
 
 class DataStorytellingPage(tk.Frame):
     def __init__(self, parent):

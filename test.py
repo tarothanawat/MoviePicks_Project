@@ -1,32 +1,41 @@
-#-*- coding: utf-8 -*-
-# Python version 3.4
-# The use of the ttk module is optional, you can use regular tkinter widgets
-
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
 
-main = Tk()
-main.title("Multiple Choice Listbox")
-main.geometry("+50+150")
-frame = ttk.Frame(main, padding=(3, 3, 12, 12))
-frame.grid(column=0, row=0, sticky=(N, S, E, W))
 
-valores = StringVar()
-valores.set("Carro Coche Moto Bici Triciclo Patineta Patin Patines Lancha Patrullas")
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
 
-lstbox = Listbox(frame, listvariable=valores, selectmode=MULTIPLE, width=20, height=10)
-lstbox.grid(column=0, row=0, columnspan=2)
+        self.geometry("240x100")
+        self.title('Login')
+        self.resizable(0, 0)
 
-def select():
-    reslist = list()
-    seleccion = lstbox.curselection()
-    for i in seleccion:
-        entrada = lstbox.get(i)
-        reslist.append(entrada)
-    for val in reslist:
-        print(val)
+        # configure the grid
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=3)
 
-btn = ttk.Button(frame, text="Choices", command=select)
-btn.grid(column=1, row=1)
+        self.create_widgets()
 
-main.mainloop()
+    def create_widgets(self):
+        # username
+        username_label = ttk.Label(self, text="Username:")
+        username_label.grid(column=0, row=0, sticky=tk.W, padx=5, pady=5)
+
+        username_entry = ttk.Entry(self)
+        username_entry.grid(column=1, row=0, sticky=tk.E, padx=5, pady=5)
+
+        # password
+        password_label = ttk.Label(self, text="Password:")
+        password_label.grid(column=0, row=1, sticky=tk.W, padx=5, pady=5)
+
+        password_entry = ttk.Entry(self,  show="*")
+        password_entry.grid(column=1, row=1, sticky=tk.E, padx=5, pady=5)
+
+        # login button
+        login_button = ttk.Button(self, text="Login")
+        login_button.grid(column=1, row=3, sticky=tk.E, padx=5, pady=5)
+
+
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
