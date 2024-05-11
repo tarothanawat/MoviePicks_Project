@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from Database import MovieDB
-from graphing import StorytellingGraph, ExplorationGraph
+from MovieController import StorytellingGraph, ExplorationGraph
 
 
 class MainApplication(tk.Tk):
