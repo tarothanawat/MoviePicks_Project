@@ -9,7 +9,7 @@ MoviePicks is a movie-finding and analysis app that helps users find movies they
 - seaborn==0.13.2
 - numpy==1.26.4
 - matplotlib==3.8.3
-- movieposters==0.0.7
+
 
 ## How to Run
 1. Clone the repository: `git clone https://github.com/tarothanawat/MoviePicks_Project.git`
