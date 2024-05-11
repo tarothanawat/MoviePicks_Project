@@ -14,8 +14,7 @@ MoviePicks is a movie-finding and analysis app that helps users find movies they
 ## How to Run
 1. Clone the repository: `git clone https://github.com/tarothanawat/MoviePicks_Project.git`
 2. Navigate to the project directory: `cd MoviePicks_project`
-3. Switch to the preview branch: `git checkout preview`
-4. Create a virtual environment: `python -m venv env`
-5. Install the required packages: `pip install -r requirements.txt`
-6. Run the application: `python main.py`
-7. Enjoy!
+3. Create a virtual environment: `python -m venv env`
+4. Install the required packages: `pip install -r requirements.txt`
+5. Run the application: `python main.py`
+6. Enjoy!
