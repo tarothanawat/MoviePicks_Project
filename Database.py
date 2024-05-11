@@ -18,17 +18,14 @@ class MovieDB:
     def get_orig_df(self):
         return self.orig_df
 
+
+
     def get_separated_genres(self, df):
         df.loc[:, 'genres'] = df['genres'].apply(lambda x: eval(x))
         df_sep_genres = df.explode('genres')
         df_sep_genres.reset_index(drop=True, inplace=True)
         return df_sep_genres
 
-    # def get_separated_genres(self, df):
-    #     df.loc[:, 'genres'] = df['genres'].apply(lambda x: eval(x))
-    #     df_sep_genres = df.explode('genres')
-    #     df_sep_genres.reset_index(drop=True, inplace=True)
-    #     return df_sep_genres
 
     def get_df_no_zero(self,df):
         no_zeros = df.loc[(df['revenue'] != 0) & (df['budget'] != 0)]
@@ -43,6 +40,9 @@ class MovieDB:
         df_by_lang = self.filter_by_attribute(df, 'original_language',lang)
         df_sep_genre = self.get_separated_genres(df_by_lang)
         return df_by_lang, df_sep_genre
+
+    def search_handler(self):
+        pass
 
 
 

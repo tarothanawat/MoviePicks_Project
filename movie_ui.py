@@ -1,8 +1,8 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Scrollbar
 from Database import MovieDB
 from MovieController import StorytellingGraph, ExplorationGraph
-
+import webbrowser
 
 class MainApplication(tk.Tk):
     def __init__(self):
@@ -29,7 +29,7 @@ class MainApplication(tk.Tk):
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill=tk.BOTH, expand=True)
 
-        self.search_page = SearchPage(self.notebook, self.df, self.movie_db)
+        self.search_page = SearchPage(self.notebook)
         self.data_storytelling_page = DataStorytellingPage(self.notebook)
         self.data_exploration_page = DataExplorationPage(self.notebook, self.df, self.movie_db)
 
@@ -49,53 +49,171 @@ class MainApplication(tk.Tk):
 
 
 class SearchPage(tk.Frame):
-    def __init__(self, parent, df, db):
+    def __init__(self, parent):
         super().__init__(parent)
-        self.df = df
-        self.db = db
-        self.configure(bg='white')
+        self.db = MovieDB()
+        self.df = self.db.get_orig_df()
+        self.df_sep_genres = self.db.get_separated_genres(self.df)
+        self.configure(bg='#FAC589')
         self.init_components()
 
     def init_components(self):
+        self.init_fonts()
+        self.init_frames()
+        self.init_top_frame()
+        self.init_filters_frame()
+        self.init_results_frame()
+
+    def init_fonts(self):
         self.font_small = ('Arial', 12)
         self.font_head = ('Arial', 14)
-        self.options = {'padx': 5, 'pady': 0}
-        self.top_frame = ttk.Frame(self, )
-        self.filters_frame = ttk.Frame(self, )
-        self.results_frame = ttk.Frame(self, relief=tk.RAISED, borderwidth=1)
 
+    def init_frames(self):
+        self.top_frame = ttk.Frame(self, relief=tk.RAISED, borderwidth=1)
+        self.filters_frame = ttk.Frame(self, relief=tk.RAISED, borderwidth=1)
+        self.results_frame = ttk.LabelFrame(self, relief=tk.RAISED, borderwidth=1, text='Search results')
+
+        self.top_frame.grid(column=0, row=0, sticky='nesw', padx=5, pady=5)
+        self.filters_frame.grid(column=0, row=1, sticky='nesw', padx=5, pady=5)
+        self.results_frame.grid(column=1, row=0, sticky='nesw', padx=5, pady=5, rowspan=2)
+
+        self.rowconfigure(0, weight=1)  # Top frame row
+        self.rowconfigure(1, weight=1)  # Filters frame row
+
+        # Set column weight for filters_frame to 1
+        self.filters_frame.columnconfigure(0, weight=1)
+        self.results_frame.columnconfigure(0, weight=10)
+
+    def init_top_frame(self):
         self.label_1 = ttk.Label(self.top_frame, text='Search for a movie: ', font=self.font_head)
-
-        # TOP
         self.search_input = tk.StringVar()
-        self.search_bar = ttk.Entry(self.top_frame, textvariable=self.search_input, font=self.font_head, width=40)
-        self.search_button = ttk.Button(self.top_frame, text='Search', )
-        # TOP grid
+        self.search_bar = ttk.Entry(self.top_frame, textvariable=self.search_input, font=self.font_head, width=25)
+        self.search_button = ttk.Button(self.top_frame, text='Search', command=self.filter_results)
+
         self.label_1.grid(row=0, column=0, padx=5, pady=5)
         self.search_bar.grid(row=0, column=1, padx=5, pady=5)
         self.search_button.grid(row=0, column=2, padx=5, pady=5)
 
-        # Filter frame
+        # Bind the Enter key to the filter_results method
+        self.search_bar.bind('<Return>', lambda event: self.filter_results())
+
+    def init_filters_frame(self):
         self.label_filter = ttk.Label(self.filters_frame, text='Filters', font=self.font_head)
         self.label_release_year = ttk.Label(self.filters_frame, text='Release Year Range:', font=self.font_small)
         self.release_year_from = ttk.Entry(self.filters_frame, font=self.font_small, width=5)
         self.label_to = ttk.Label(self.filters_frame, text='to', font=self.font_small)
         self.release_year_to = ttk.Entry(self.filters_frame, font=self.font_small, width=5)
+        self.genres_label = ttk.Label(self.filters_frame, text='Genres:', font=self.font_small)
 
-        # Filters grid
-        self.label_filter.grid(row=0, column=0, columnspan=3, sticky=tk.W, **self.options)
-        self.label_release_year.grid(row=1, column=0, **self.options)
-        self.release_year_from.grid(row=1, column=1, **self.options)
-        self.label_to.grid(row=1, column=2, **self.options)
-        self.release_year_to.grid(row=1, column=3, **self.options)
+        self.genre_list_var = tk.Variable()
+        self.genre_list_box = tk.Listbox(self.filters_frame, selectmode=tk.MULTIPLE, listvariable=self.genre_list_var)
+        for value in self.df_sep_genres['genres'].unique():
+            self.genre_list_box.insert(tk.END, value)
 
-        self.top_frame.grid(column=0, row=0, sticky='ew', **self.options)
-        self.filters_frame.grid(column=0, row=1, sticky='ew', **self.options)
-        self.results_frame.grid(column=1, row=1, sticky='ew', **self.options)
+        # Add scrollbar to the genre list box
+        genre_scrollbar = Scrollbar(self.filters_frame, orient=tk.VERTICAL)
+        genre_scrollbar.config(command=self.genre_list_box.yview)
+        self.genre_list_box.config(yscrollcommand=genre_scrollbar.set)
+        genre_scrollbar.grid(row=2, column=2, sticky='ns')
 
-        # Configure grid row and column weights
-        self.rowconfigure(0, weight=1)  # Top frame row
-        self.rowconfigure(1, weight=1)  # Filters frame row
+        self.rating_label = ttk.Label(self.filters_frame, text='Rating', font=self.font_small)
+        self.rating_combobox = ttk.Combobox(self.filters_frame,
+                                            values=['None', 'Most Rated', 'Least Rated'],
+                                            font=self.font_small,
+                                            state='readonly')
+        self.rating_combobox.set('None')  # Set default selection to 'None'
+
+        self.popularity_label = ttk.Label(self.filters_frame, text='Popularity', font=self.font_small)
+        self.popularity_combobox = ttk.Combobox(self.filters_frame,
+                                                values=['None', 'Most Popular', 'Least Popular'],
+                                                font=self.font_small,
+                                                state='readonly')
+        self.popularity_combobox.set('None')  # Set default selection to 'None'
+        self.label_filter.grid(row=0, column=0, columnspan=3, sticky=tk.W, padx=5, pady=5)
+        self.label_release_year.grid(row=1, column=0, padx=5, pady=5)
+        self.release_year_from.grid(row=1, column=1, padx=5, pady=5, sticky='w')
+        self.label_to.grid(row=1, column=1, padx=5, pady=5, sticky='ns')
+        self.release_year_to.grid(row=1, column=1, padx=5, pady=5, sticky='e')
+        self.genres_label.grid(row=2, column=0, padx=5, pady=5)
+        self.genre_list_box.grid(row=2, column=1, padx=5, pady=5)
+        self.rating_label.grid(row=3, column=0, padx=5, pady=5)
+        self.rating_combobox.grid(row=3, column=1, padx=5, pady=5)
+        self.popularity_label.grid(row=3, column=2, padx=5, pady=5)
+        self.popularity_combobox.grid(row=3, column=3, padx=5, pady=5)
+
+    def init_results_frame(self):
+        self.results_tree_view = ttk.Treeview(self.results_frame,
+                                              columns=('Title', 'Release Year', 'Genres', 'Vote Average', 'Popularity'),
+                                              show='headings')
+        self.results_tree_view.heading('Title', text='Title')
+        self.results_tree_view.heading('Release Year', text='Release Year')
+        self.results_tree_view.heading('Genres', text='Genres')
+        self.results_tree_view.heading('Vote Average', text='Vote Average')
+        self.results_tree_view.heading('Popularity', text='Popularity')
+
+        for col in self.results_tree_view['columns']:
+            self.results_tree_view.column(col, width=175, anchor=tk.CENTER)
+
+        # Add scrollbar to the results treeview
+        results_scrollbar = Scrollbar(self.results_frame, orient=tk.VERTICAL)
+        results_scrollbar.config(command=self.results_tree_view.yview)
+        self.results_tree_view.config(yscrollcommand=results_scrollbar.set)
+        results_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.results_tree_view.bind('<ButtonRelease-1>', self.open_imdb_link)
+
+        self.results_tree_view.pack(expand=True, fill=tk.BOTH)
+
+    def open_imdb_link(self, event):
+        item = self.results_tree_view.item(self.results_tree_view.focus())
+        title = item['values'][0]  # Assuming title is the first column
+        row = self.df[self.df['title'] == title].iloc[0]
+        imdb_link = row['imdb_link']
+        if imdb_link:
+            webbrowser.open(imdb_link)
+
+    def filter_results(self):
+        # Clear previous search results
+        for item in self.results_tree_view.get_children():
+            self.results_tree_view.delete(item)
+
+        # Get user input
+        search_term = self.search_input.get()
+        release_year_from = self.release_year_from.get()
+        release_year_to = self.release_year_to.get()
+        selected_genres = [self.genre_list_box.get(index) for index in self.genre_list_box.curselection()]
+        rating_filter = self.rating_combobox.get()
+        popularity_filter = self.popularity_combobox.get()
+
+        # Filter the DataFrame based on user input
+        filtered_df = self.df.copy()
+        if search_term:
+            filtered_df = filtered_df[filtered_df['title'].str.contains(search_term, case=False)]
+        if release_year_from:
+            release_year_from = int(release_year_from)
+            filtered_df = filtered_df[filtered_df['release_year'] >= release_year_from]
+        if release_year_to:
+            release_year_to = int(release_year_to)
+            filtered_df = filtered_df[filtered_df['release_year'] <= release_year_to]
+        if not release_year_from and not release_year_to:
+            # If both "from" and "to" are not filled, search for all years
+            pass
+        if selected_genres:
+            filtered_df = filtered_df[
+                filtered_df['genres'].apply(lambda x: any(genre in x for genre in selected_genres))]
+        if rating_filter == 'Most Rated':
+            filtered_df = filtered_df.sort_values(by='vote_average', ascending=False)
+        elif rating_filter == 'Least Rated':
+            filtered_df = filtered_df.sort_values(by='vote_average', ascending=True)
+        if popularity_filter == 'Most Popular':
+            filtered_df = filtered_df.sort_values(by='popularity', ascending=False)
+        elif popularity_filter == 'Least Popular':
+            filtered_df = filtered_df.sort_values(by='popularity', ascending=True)
+
+        for index, row in filtered_df.iterrows():
+            values = tuple(row[['title', 'release_year', 'genres', 'vote_average', 'popularity']])
+            self.results_tree_view.insert('', 'end', values=values)
+
 
 class DataStorytellingPage(tk.Frame):
     def __init__(self, parent):
@@ -112,14 +230,14 @@ class DataStorytellingPage(tk.Frame):
         self.language_label = ttk.Label(self, text="Select Original Language:")
         self.language_label.pack()
         self.language_var = tk.StringVar()
-        self.language_dropdown = ttk.Combobox(self, textvariable=self.language_var, width=42)
+        self.language_dropdown = ttk.Combobox(self, textvariable=self.language_var, width=42, state='readonly')
         self.language_dropdown.pack(pady=5)
 
         # Dropdown menu for selecting the story to tell
         self.story_label = ttk.Label(self, text="Select the Story to know:")
         self.story_label.pack()
         self.story_var = tk.StringVar()
-        self.story_dropdown = ttk.Combobox(self, textvariable=self.story_var, width=42)
+        self.story_dropdown = ttk.Combobox(self, textvariable=self.story_var, width=42, state='readonly')
         self.story_dropdown.pack(pady=5)
 
         # Button to show the selected story
@@ -130,8 +248,6 @@ class DataStorytellingPage(tk.Frame):
         selected_language = self.language_var.get()
         selected_story = self.story_var.get()
         # Use the selected language and story to show the relevant information or visualization
-        print("Selected Language:", selected_language)
-        print("Selected Story:", selected_story)
         self.storytelling_manager.selected_language = selected_language
 
         if self.current_canvas:
