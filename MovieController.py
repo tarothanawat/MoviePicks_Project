@@ -2,14 +2,16 @@ import matplotlib as plt
 from Database import MovieDB
 plt.use("TkAgg")
 import tkinter as tk
-from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import seaborn as sns
 from matplotlib.figure import Figure
-import pandas as pd
+
 
 
 class StorytellingGraph:
+    """
+    Class for creating storytelling graphs.
+    """
 
     def __init__(self, parent):
         super().__init__()
@@ -165,6 +167,9 @@ class StorytellingGraph:
 
 
 class ExplorationGraph:
+    """
+    Class for creating exploration graphs.
+    """
     def __init__(self, parent):
         super().__init__()
         self.db = MovieDB()
