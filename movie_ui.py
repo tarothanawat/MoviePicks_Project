@@ -355,6 +355,7 @@ class DataExplorationPage(tk.Frame):
                 y_attribute
             )
             self.current_canvas.pack(pady=5)
+
     def get_selected_sub_values(self):
         selected_indices = self.x_sub_listbox.curselection()
         selected_sub_values = [self.x_sub_listbox.get(idx) for idx in selected_indices]
