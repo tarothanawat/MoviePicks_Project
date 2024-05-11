@@ -5,6 +5,7 @@ from MovieController import StorytellingGraph, ExplorationGraph
 import webbrowser
 
 class MainApplication(tk.Tk):
+    """Main application class for the Movie picks application."""
     def __init__(self):
         super().__init__()
         self.title("Movie picks application")
@@ -17,6 +18,7 @@ class MainApplication(tk.Tk):
         self.init_components()
 
     def init_components(self):
+        """Initialize the main application."""
         menu_bar = tk.Menu(self)
         self.config(menu=menu_bar)
 
@@ -26,6 +28,7 @@ class MainApplication(tk.Tk):
         menu_bar.add_cascade(label="File", menu=file_menu)
 
     def init_frames(self):
+        """Initialize the menu bar."""
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill=tk.BOTH, expand=True)
 
@@ -39,6 +42,7 @@ class MainApplication(tk.Tk):
 
 
     def populate_dropdowns(self):
+        """Initialize the notebook and frames."""
         languages = self.df['original_language'].unique()
         self.data_storytelling_page.language_dropdown['values'] = [x for x in languages]
 
@@ -49,6 +53,7 @@ class MainApplication(tk.Tk):
 
 
 class SearchPage(tk.Frame):
+    """Frame for the search page."""
     def __init__(self, parent):
         super().__init__(parent)
         self.db = MovieDB()

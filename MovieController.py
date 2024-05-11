@@ -11,9 +11,29 @@ from matplotlib.figure import Figure
 class StorytellingGraph:
     """
     Class for creating storytelling graphs.
+
+    Attributes:
+    - db (MovieDB): An instance of the MovieDB class for database interaction.
+    - df (DataFrame): The original DataFrame containing movie data.
+    - _selected_language (str): The selected language for analysis.
+    - parent (Tk): The parent Tkinter window.
+
+    Methods:
+    - selected_language (property): Getter and setter for the selected_language attribute.
+    - get_descriptive_stats(root): Generate and display descriptive statistics for the selected language.
+    - get_correlation(root): Generate and display correlation matrix and scatter plot.
+    - get_histogram(root): Generate and display histograms of revenue and budget.
+    - get_bar_graph(root): Generate and display a bar graph of average revenue and budget by genre.
+    - get_trend(root): Generate and display a line graph of average revenue trend over the years.
     """
 
     def __init__(self, parent):
+        """
+        Initialize the StorytellingGraph class.
+
+        Args:
+        - parent (Tk): The parent Tkinter window.
+        """
         super().__init__()
         self.db = MovieDB()
         self.df = self.db.get_orig_df()
@@ -22,14 +42,35 @@ class StorytellingGraph:
 
     @property
     def selected_language(self):
+        """
+        Getter for the selected_language attribute.
+
+        Returns:
+        - str: The selected language for analysis.
+        """
         return self._selected_language
 
     @selected_language.setter
     def selected_language(self, new_lang):
+        """
+        Setter for the selected_language attribute.
+
+        Args:
+        - new_lang (str): The new selected language for analysis.
+        """
         self._selected_language = new_lang
         self.df_by_lang, self.df_sep_genre = self.db.storytelling(self.df, self._selected_language)
 
     def get_descriptive_stats(self, root):
+        """
+        Generate and display descriptive statistics for the selected language.
+
+        Args:
+        - root (Tk): The root Tkinter window.
+
+        Returns:
+        - Text: A Text widget containing the formatted descriptive statistics.
+        """
         statistics = self.df_by_lang[['budget', 'revenue']].describe()
 
         # Format the descriptive statistics for better readability
@@ -47,6 +88,15 @@ class StorytellingGraph:
         return text_widget
 
     def get_correlation(self, root):
+        """
+        Generate and display correlation matrix and scatter plot.
+
+        Args:
+        - root (Tk): The root Tkinter window.
+
+        Returns:
+        - Frame: A Frame widget containing the correlation matrix and scatter plot.
+        """
         frame = tk.Frame(root)
 
         # Calculate correlation matrix
@@ -84,6 +134,15 @@ class StorytellingGraph:
         return frame
 
     def get_histogram(self, root):
+        """
+        Generate and display histograms of revenue and budget.
+
+        Args:
+        - root (Tk): The root Tkinter window.
+
+        Returns:
+        - Frame: A Frame widget containing the histograms.
+        """
         frame = tk.Frame(root)
         fig = Figure(figsize=(10, 6))
 
@@ -112,6 +171,15 @@ class StorytellingGraph:
         return frame
 
     def get_bar_graph(self, root):
+        """
+        Generate and display a bar graph of average revenue and budget by genre.
+
+        Args:
+        - root (Tk): The root Tkinter window.
+
+        Returns:
+        - Frame: A Frame widget containing the bar graph.
+        """
         frame = tk.Frame(root)
         fig = Figure(figsize=(12, 6))  # Increase the width of the figure
         ax = fig.add_subplot(111)
@@ -142,6 +210,15 @@ class StorytellingGraph:
         return frame
 
     def get_trend(self, root):
+        """
+        Generate and display a line graph of average revenue trend over the years.
+
+        Args:
+        - root (Tk): The root Tkinter window.
+
+        Returns:
+        - Frame: A Frame widget containing the line graph.
+        """
         frame = tk.Frame(root)
         # Create a new figure
         fig = Figure(figsize=(10, 6))
@@ -169,8 +246,26 @@ class StorytellingGraph:
 class ExplorationGraph:
     """
     Class for creating exploration graphs.
+
+    Attributes:
+    - db (MovieDB): An instance of the MovieDB class for database interaction.
+    - df (DataFrame): The original DataFrame containing movie data.
+    - df_sep_genres (DataFrame): The DataFrame with genres separated for analysis.
+    - parent (Tk): The parent Tkinter window.
+
+    Methods:
+    - group_data(x_attribute, x_sub_var, y_attribute): Group the data based on the selected attributes.
+    - plot_bar_graph(root, x_attribute, x_sub_var, y_attribute): Generate and display a bar graph.
+    - plot_line_plot(root, x_attribute, x_sub_var, y_attribute): Generate and display a line graph.
+    - plot_scatter_plot(root, x_attribute, y_attribute, transparency=0.5): Generate and display a scatter plot.
     """
     def __init__(self, parent):
+        """
+        Initialize the ExplorationGraph class.
+
+        Args:
+        - parent (Tk): The parent Tkinter window.
+        """
         super().__init__()
         self.db = MovieDB()
         self.df = self.db.get_orig_df()
@@ -178,6 +273,17 @@ class ExplorationGraph:
         self.parent = parent
 
     def group_data(self, x_attribute, x_sub_var, y_attribute):
+        """
+        Groups the data based on the specified attributes.
+
+        Args:
+        - x_attribute: The attribute to group by.
+        - x_sub_var: The sub-attribute value(s) for further filtering.
+        - y_attribute: The attribute for which to calculate the mean.
+
+        Returns:
+        - grouped_data: The grouped DataFrame.
+        """
         if x_attribute == 'genres' and isinstance(x_sub_var, list) and len(x_sub_var) > 0:
             # Filter the dataframe to include only the selected genres
             grouped_data = self.df_sep_genres[self.df_sep_genres['genres'].isin(x_sub_var)]
@@ -208,6 +314,18 @@ class ExplorationGraph:
         return grouped_data
 
     def plot_bar_graph(self, root, x_attribute, x_sub_var, y_attribute):
+        """
+        Plots a bar graph based on the grouped data.
+
+        Args:
+        - root: The root Tkinter widget.
+        - x_attribute: The attribute for the x-axis.
+        - x_sub_var: The sub-attribute value(s) for further filtering.
+        - y_attribute: The attribute for the y-axis.
+
+        Returns:
+        - canvas_widget: The canvas widget containing the bar graph.
+        """
         # Create a new figure
         fig = Figure(figsize=(10, 6))
         ax = fig.add_subplot(111)
@@ -233,6 +351,18 @@ class ExplorationGraph:
         return canvas_widget
 
     def plot_line_plot(self, root, x_attribute, x_sub_var, y_attribute):
+        """
+        Plots a line plot based on the grouped data.
+
+        Args:
+        - root: The root Tkinter widget.
+        - x_attribute: The attribute for the x-axis.
+        - x_sub_var: The sub-attribute value(s) for further filtering.
+        - y_attribute: The attribute for the y-axis.
+
+        Returns:
+        - canvas_widget: The canvas widget containing the line plot.
+        """
         # Create a new figure
         fig = Figure(figsize=(10, 6))
         ax = fig.add_subplot(111)
@@ -257,6 +387,18 @@ class ExplorationGraph:
         return canvas_widget
 
     def plot_scatter_plot(self, root, x_attribute, y_attribute, transparency=0.5):
+        """
+        Plots a scatter plot based on the data.
+
+        Args:
+        - root: The root Tkinter widget.
+        - x_attribute: The attribute for the x-axis.
+        - y_attribute: The attribute for the y-axis.
+        - transparency: The transparency level of the scatter plot markers (default is 0.5).
+
+        Returns:
+        - canvas_widget: The canvas widget containing the scatter plot.
+        """
         # Create a new figure
         fig = Figure(figsize=(12, 8))  # Increase the figure size for better readability
         ax = fig.add_subplot(111)
