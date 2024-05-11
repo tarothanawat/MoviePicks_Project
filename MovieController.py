@@ -1,11 +1,13 @@
+"""
+Use to help plot graphs and control UI behavior
+"""
 import matplotlib as plt
-from Database import MovieDB
-plt.use("TkAgg")
-import tkinter as tk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import seaborn as sns
+import tkinter as tk
+from Database import MovieDB
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-
+plt.use("TkAgg")
 
 
 class StorytellingGraph:

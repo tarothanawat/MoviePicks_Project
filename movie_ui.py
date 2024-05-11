@@ -1,8 +1,12 @@
+"""
+This module contains UI for the Application
+"""
 import tkinter as tk
 from tkinter import ttk, Scrollbar
 from Database import MovieDB
 from MovieController import StorytellingGraph, ExplorationGraph
 import webbrowser
+
 
 class MainApplication(tk.Tk):
     """Main application class for the Movie picks application."""
@@ -55,6 +59,7 @@ class MainApplication(tk.Tk):
 class SearchPage(tk.Frame):
     """Frame for the search page."""
     def __init__(self, parent):
+        """Initialize the search page."""
         super().__init__(parent)
         self.db = MovieDB()
         self.df = self.db.get_orig_df()
@@ -63,6 +68,7 @@ class SearchPage(tk.Frame):
         self.init_components()
 
     def init_components(self):
+        """Initialize components of the search page."""
         self.init_fonts()
         self.init_frames()
         self.init_top_frame()
@@ -70,10 +76,12 @@ class SearchPage(tk.Frame):
         self.init_results_frame()
 
     def init_fonts(self):
+        """Initialize fonts."""
         self.font_small = ('Arial', 12)
         self.font_head = ('Arial', 14)
 
     def init_frames(self):
+        """Initialize frames."""
         self.top_frame = ttk.Frame(self, relief=tk.RAISED, borderwidth=1)
         self.filters_frame = ttk.Frame(self, relief=tk.RAISED, borderwidth=1)
         self.results_frame = ttk.LabelFrame(self, relief=tk.RAISED, borderwidth=1, text='Search results')
@@ -90,6 +98,7 @@ class SearchPage(tk.Frame):
         self.results_frame.columnconfigure(0, weight=10)
 
     def init_top_frame(self):
+        """Initialize the top frame."""
         self.label_1 = ttk.Label(self.top_frame, text='Search for a movie: ', font=self.font_head)
         self.search_input = tk.StringVar()
         self.search_bar = ttk.Entry(self.top_frame, textvariable=self.search_input, font=self.font_head, width=25)
@@ -103,6 +112,7 @@ class SearchPage(tk.Frame):
         self.search_bar.bind('<Return>', lambda event: self.filter_results())
 
     def init_filters_frame(self):
+        """Initialize the filters frame."""
         self.label_filter = ttk.Label(self.filters_frame, text='Filters', font=self.font_head)
         self.label_release_year = ttk.Label(self.filters_frame, text='Release Year Range:', font=self.font_small)
         self.release_year_from = ttk.Entry(self.filters_frame, font=self.font_small, width=5)
@@ -155,6 +165,7 @@ class SearchPage(tk.Frame):
         self.popularity_combobox.grid(row=3, column=3, padx=5, pady=5)
 
     def init_results_frame(self):
+        """Initialize the results frame."""
         self.results_tree_view = ttk.Treeview(self.results_frame,
                                               columns=('Title', 'Release Year', 'Genres', 'Vote Average', 'Popularity'),
                                               show='headings')
@@ -178,6 +189,7 @@ class SearchPage(tk.Frame):
         self.results_tree_view.pack(expand=True, fill=tk.BOTH)
 
     def open_imdb_link(self, event):
+        """ Open the IMDB link"""
         item = self.results_tree_view.item(self.results_tree_view.focus())
         title = item['values'][0]  # Assuming title is the first column
         row = self.df[self.df['title'] == title].iloc[0]
@@ -186,6 +198,7 @@ class SearchPage(tk.Frame):
             webbrowser.open(imdb_link)
 
     def filter_results(self):
+        """Filter results based on user input."""
         # Clear previous search results
         for item in self.results_tree_view.get_children():
             self.results_tree_view.delete(item)
@@ -231,7 +244,9 @@ class SearchPage(tk.Frame):
             self.results_tree_view.insert('', 'end', values=values)
 
 class DataStorytellingPage(tk.Frame):
+    """Frame for data storytelling."""
     def __init__(self, parent):
+        """Initialize the data storytelling page."""
         super().__init__(parent)
         self.parent = parent
         self.label = ttk.Label(self, text="Data Storytelling Page", font=('Arial',20))
@@ -241,6 +256,7 @@ class DataStorytellingPage(tk.Frame):
         self.current_canvas = None
 
     def init_components(self):
+        """Initialize components of the data storytelling page."""
         # Dropdown menu for selecting original language
         self.language_label = ttk.Label(self, text="Select Original Language:")
         self.language_label.pack()
@@ -260,6 +276,7 @@ class DataStorytellingPage(tk.Frame):
         self.show_story_button.pack()
 
     def show_story(self):
+        """Shows story when pressed"""
         selected_language = self.language_var.get()
         selected_story = self.story_var.get()
         # Use the selected language and story to show the relevant information or visualization
@@ -286,6 +303,7 @@ class DataStorytellingPage(tk.Frame):
 
 
 class DataExplorationPage(tk.Frame):
+    """Frame for data exploration."""
     def __init__(self, parent, df, db):
         super().__init__(parent)
         self.graph_controller = ExplorationGraph(self)
@@ -299,6 +317,7 @@ class DataExplorationPage(tk.Frame):
         self.current_canvas = None  # Initialize current_canvas
 
     def init_components(self):
+        """Initialize the data exploration page."""
         self.font_combo = ('Arial', 8)
         self.font = ('Arial', 14)
         self.left_frame = tk.Frame(self, bg='black')
@@ -325,6 +344,7 @@ class DataExplorationPage(tk.Frame):
         self.columnconfigure(1, weight=1)
 
     def show_graph(self):
+        """ Calls StorytellingGraph the plot the graph """
         if self.current_canvas:
             self.current_canvas.pack_forget()
 
@@ -362,11 +382,13 @@ class DataExplorationPage(tk.Frame):
             self.current_canvas.pack(pady=5)
 
     def get_selected_sub_values(self):
+        """ get sub values"""
         selected_indices = self.x_sub_listbox.curselection()
         selected_sub_values = [self.x_sub_listbox.get(idx) for idx in selected_indices]
         return selected_sub_values
 
     def init_sub_frame(self, *args):
+        """ initializes sub frame """
         # Remove the sub_frame if it exists
         if hasattr(self, 'sub_frame'):
             self.sub_frame.pack_forget()
@@ -426,6 +448,7 @@ class DataExplorationPage(tk.Frame):
 
         # Pack the sub_frame if the current graph type requires it
     def sub_menu_handler(self, *args):
+        """ sub menu event handler """
         current_x = self.x_axis_var.get()
         if current_x in self.x_sub_values:
             sub_values = self.x_sub_values[current_x]
@@ -434,6 +457,7 @@ class DataExplorationPage(tk.Frame):
                 self.x_sub_listbox.insert(tk.END, value)
 
     def update_selected_sub_values(self, event=None):
+        """ update values """
         self.selected_genre = self.get_selected_sub_values()
         if self.x_axis_var.get() == 'release_year':
             self.x_sub_listbox['selectmode'] = tk.EXTENDED

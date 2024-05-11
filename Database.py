@@ -1,3 +1,7 @@
+"""
+This module handles data manipulation
+"""
+
 import pandas as pd
 import os
 
@@ -14,13 +18,12 @@ class MovieDB:
         self.orig_df = csv_loader(os.getcwd(), 'movies_with_links.csv')
         self.orig_df['release_date'] = pd.to_datetime(self.orig_df['release_date'])
 
-
     def get_orig_df(self):
+        """ return  orig_df """
         return self.orig_df
 
-
-
     def get_separated_genres(self, df):
+        """ explode genrese column """
         df.loc[:, 'genres'] = df['genres'].apply(lambda x: eval(x))
         df_sep_genres = df.explode('genres')
         df_sep_genres.reset_index(drop=True, inplace=True)
@@ -28,14 +31,18 @@ class MovieDB:
 
 
     def get_df_no_zero(self,df):
+        """ drop all datas with zeros """
         no_zeros = df.loc[(df['revenue'] != 0) & (df['budget'] != 0)]
         return no_zeros
 
     def filter_by_attribute(self, df, key, value):
+        """ filter by attribute given """
         filtered = df[df[key] == value]
         return filtered
 
     def storytelling(self, df, lang):
+        """ manipulated data for storytelling """
+
         # df_no_zeros = self.get_df_no_zero(df)
         df_by_lang = self.filter_by_attribute(df, 'original_language',lang)
         df_sep_genre = self.get_separated_genres(df_by_lang)
