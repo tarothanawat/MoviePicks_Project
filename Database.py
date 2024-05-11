@@ -41,8 +41,6 @@ class MovieDB:
         df_sep_genre = self.get_separated_genres(df_by_lang)
         return df_by_lang, df_sep_genre
 
-    def search_handler(self):
-        pass
 
 
 

@@ -111,20 +111,25 @@ class StorytellingGraph:
 
     def get_bar_graph(self, root):
         frame = tk.Frame(root)
-        fig = Figure(figsize=(10, 6))  # Increase the width of the figure
+        fig = Figure(figsize=(12, 6))  # Increase the width of the figure
         ax = fig.add_subplot(111)
 
         # Group by genre and calculate average metrics
         avg_metrics_by_genre = self.df_sep_genre.groupby('genres')[['revenue', 'budget']].mean().reset_index()
 
         # Plot bar chart
-        sns.barplot(x='genres', y='revenue', data=avg_metrics_by_genre, color='skyblue', ax=ax)
-        sns.barplot(x='genres', y='budget', data=avg_metrics_by_genre, color='salmon', ax=ax)
+        sns.barplot(x='genres', y='revenue', data=avg_metrics_by_genre, color='skyblue', ax=ax, label='Revenue')
+        sns.barplot(x='genres', y='budget', data=avg_metrics_by_genre, color='salmon', ax=ax, label='Budget')
 
-        ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
+        if len(ax.get_xticks()) > 9:
+            ax.tick_params(axis='x', rotation=30, labelsize=8)
+
         ax.set_xlabel('Genre')
         ax.set_ylabel('Average')
         ax.set_title('Average Revenue, Budget by Genre')
+
+        # Add legend
+        ax.legend()
 
         # Create a canvas widget for displaying the plot
         canvas = FigureCanvasTkAgg(fig, master=frame)
@@ -166,7 +171,8 @@ class ExplorationGraph:
         self.df = self.db.get_orig_df()
         self.df_sep_genres = self.db.get_separated_genres(self.df)
         self.parent = parent
-    def group_data(self,x_attribute, x_sub_var, y_attribute):
+
+    def group_data(self, x_attribute, x_sub_var, y_attribute):
         if x_attribute == 'genres' and isinstance(x_sub_var, list) and len(x_sub_var) > 0:
             # Filter the dataframe to include only the selected genres
             grouped_data = self.df_sep_genres[self.df_sep_genres['genres'].isin(x_sub_var)]
@@ -177,12 +183,11 @@ class ExplorationGraph:
             # Plot all genres
             grouped_data = self.df_sep_genres
         elif x_attribute == 'original_language' and isinstance(x_sub_var, list) and len(x_sub_var) > 0:
-            # Filter the dataframe to include only the selected genres
+            # Filter the dataframe to include only the selected original languages
             grouped_data = self.df_sep_genres[self.df_sep_genres['original_language'].isin(x_sub_var)]
         elif x_attribute == 'original_language' and isinstance(x_sub_var, str):
-            # Filter the dataframe to include only the selected genre
+            # Filter the dataframe to include only the selected original language
             grouped_data = self.df_sep_genres[self.df_sep_genres['original_language'] == x_sub_var]
-
         elif x_attribute == 'release_year' and isinstance(x_sub_var, list) and len(x_sub_var) > 0:
             # Convert list elements to integers
             x_sub_var = [int(year) for year in x_sub_var]
@@ -194,7 +199,6 @@ class ExplorationGraph:
         else:
             # Group by the x_attribute and calculate the mean of the y_attribute
             grouped_data = self.df.groupby(x_attribute)[y_attribute].mean().reset_index()
-
 
         return grouped_data
 
@@ -227,12 +231,13 @@ class ExplorationGraph:
         # Create a new figure
         fig = Figure(figsize=(10, 6))
         ax = fig.add_subplot(111)
+
+        # Group the data based on the x_attribute and x_sub_var
         grouped_data = self.group_data(x_attribute, x_sub_var, y_attribute)
 
-
         # Plot the line plot
-        sns.lineplot(x=x_attribute, y=y_attribute, data=grouped_data, ax=ax)
-        ax.set_xlabel(x_attribute.capitalize())
+        sns.lineplot(x='release_year', y=y_attribute, hue='genres', palette='tab10', data=grouped_data, ax=ax)
+        ax.set_xlabel('Release Year')
         ax.set_ylabel(y_attribute.capitalize())
         ax.set_title(f'Line Plot of {y_attribute.capitalize()} by {x_attribute.capitalize()}')
         ax.grid(True)
@@ -248,14 +253,21 @@ class ExplorationGraph:
 
     def plot_scatter_plot(self, root, x_attribute, y_attribute, transparency=0.5):
         # Create a new figure
-        fig = Figure(figsize=(10, 6))
+        fig = Figure(figsize=(12, 8))  # Increase the figure size for better readability
         ax = fig.add_subplot(111)
 
-        # Plot the scatter plot with transparency
-        ax.scatter(self.df[x_attribute], self.df[y_attribute], alpha=transparency)
+        # Plot each genre separately with a different color
+        genres = self.df_sep_genres['genres'].unique()
+        colors = plt.cm.tab20.colors  # Get a list of colors from the 'tab20' colormap
+        for i, genre in enumerate(genres):
+            genre_df = self.df_sep_genres[self.df_sep_genres['genres'] == genre]
+            ax.scatter(genre_df[x_attribute], genre_df[y_attribute], label=genre, alpha=transparency,
+                       color=colors[i % len(colors)])
+
         ax.set_xlabel(x_attribute.capitalize())
         ax.set_ylabel(y_attribute.capitalize())
         ax.set_title(f'Scatter Plot of {y_attribute.capitalize()} vs {x_attribute.capitalize()}')
+        ax.legend(title='Genre', bbox_to_anchor=(1, 1), loc='upper left')  # Adjust legend position
         ax.grid(True)
 
         # Create a canvas widget for displaying the plot

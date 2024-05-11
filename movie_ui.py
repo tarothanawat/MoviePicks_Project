@@ -111,10 +111,16 @@ class SearchPage(tk.Frame):
             self.genre_list_box.insert(tk.END, value)
 
         # Add scrollbar to the genre list box
-        genre_scrollbar = Scrollbar(self.filters_frame, orient=tk.VERTICAL)
+        genre_scrollbar = Scrollbar(self.filters_frame, orient=tk.VERTICAL, )
         genre_scrollbar.config(command=self.genre_list_box.yview)
-        self.genre_list_box.config(yscrollcommand=genre_scrollbar.set)
-        genre_scrollbar.grid(row=2, column=2, sticky='ns')
+        self.genre_list_box.config(yscrollcommand=genre_scrollbar.set, width=15)
+        genre_scrollbar.grid(row=2, column=1, sticky='ns')
+
+        self.lang_list_label = ttk.Label(self.filters_frame, text='Original Language', font=self.font_small)
+        self.lang_list_var = tk.StringVar()
+        self.lang_combobox = ttk.Combobox(self.filters_frame, textvariable=self.lang_list_var, font=self.font_small,
+                                          state='readonly')
+        self.lang_combobox['values'] = list(self.df_sep_genres['original_language'].unique())
 
         self.rating_label = ttk.Label(self.filters_frame, text='Rating', font=self.font_small)
         self.rating_combobox = ttk.Combobox(self.filters_frame,
@@ -128,14 +134,16 @@ class SearchPage(tk.Frame):
                                                 values=['None', 'Most Popular', 'Least Popular'],
                                                 font=self.font_small,
                                                 state='readonly')
-        self.popularity_combobox.set('None')  # Set default selection to 'None'
         self.label_filter.grid(row=0, column=0, columnspan=3, sticky=tk.W, padx=5, pady=5)
         self.label_release_year.grid(row=1, column=0, padx=5, pady=5)
         self.release_year_from.grid(row=1, column=1, padx=5, pady=5, sticky='w')
         self.label_to.grid(row=1, column=1, padx=5, pady=5, sticky='ns')
         self.release_year_to.grid(row=1, column=1, padx=5, pady=5, sticky='e')
-        self.genres_label.grid(row=2, column=0, padx=5, pady=5)
-        self.genre_list_box.grid(row=2, column=1, padx=5, pady=5)
+        self.genres_label.grid(row=2, column=0, padx=5, pady=5, sticky='w')
+        self.genre_list_box.grid(row=2, column=1, padx=5, pady=5, sticky='w')
+        self.lang_list_label.grid(row=2, column=2, padx=5, pady=5, sticky='w')
+        self.lang_combobox.grid(row=2, column=3, padx=5, pady=5)
+
         self.rating_label.grid(row=3, column=0, padx=5, pady=5)
         self.rating_combobox.grid(row=3, column=1, padx=5, pady=5)
         self.popularity_label.grid(row=3, column=2, padx=5, pady=5)
@@ -182,6 +190,7 @@ class SearchPage(tk.Frame):
         release_year_from = self.release_year_from.get()
         release_year_to = self.release_year_to.get()
         selected_genres = [self.genre_list_box.get(index) for index in self.genre_list_box.curselection()]
+        selected_language = self.lang_combobox.get()  # Get the selected language directly from the Combobox
         rating_filter = self.rating_combobox.get()
         popularity_filter = self.popularity_combobox.get()
 
@@ -201,6 +210,8 @@ class SearchPage(tk.Frame):
         if selected_genres:
             filtered_df = filtered_df[
                 filtered_df['genres'].apply(lambda x: any(genre in x for genre in selected_genres))]
+        if selected_language:  # Check if a language is selected
+            filtered_df = filtered_df[filtered_df['original_language'] == selected_language]
         if rating_filter == 'Most Rated':
             filtered_df = filtered_df.sort_values(by='vote_average', ascending=False)
         elif rating_filter == 'Least Rated':
@@ -213,7 +224,6 @@ class SearchPage(tk.Frame):
         for index, row in filtered_df.iterrows():
             values = tuple(row[['title', 'release_year', 'genres', 'vote_average', 'popularity']])
             self.results_tree_view.insert('', 'end', values=values)
-
 
 class DataStorytellingPage(tk.Frame):
     def __init__(self, parent):
@@ -360,6 +370,7 @@ class DataExplorationPage(tk.Frame):
         x_axis = ['genres', 'release_year', 'original_language']
         y_axis = ['revenue', 'budget', 'profit']
         num_att = ['revenue', 'budget', 'profit', 'release_year']
+        line_x = ['genres', 'original_language']
         self.sub_frame = tk.Frame(self.right_frame)
         self.x_axis_var = tk.StringVar()
         self.y_axis_var = tk.StringVar()
@@ -381,7 +392,10 @@ class DataExplorationPage(tk.Frame):
 
         self.y_axis_combobox = ttk.Combobox(self.sub_frame, textvariable=self.y_axis_var, width=42,
                                             font=self.font_combo)
-        self.x_axis_combobox['values'] = x_axis
+        if self.current_graph == 'Line Plot':
+            self.x_axis_combobox['values'] = line_x
+        else:
+            self.x_axis_combobox['values'] = x_axis
 
         self.y_axis_combobox['values'] = y_axis
 
