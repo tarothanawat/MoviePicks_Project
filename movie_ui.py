@@ -56,6 +56,7 @@ class SearchPage(tk.Frame):
         self.df = df
         self.db = db
 
+
 class DataStorytellingPage(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -138,7 +139,7 @@ class DataExplorationPage(tk.Frame):
         self.graph_combobox = ttk.Combobox(self.right_frame, textvariable=self.graph_combobox_var, width=42,
                                             font=self.font_combo)
         self.graph_combobox.bind('<<ComboboxSelected>>', self.init_sub_frame)
-        self.graph_combobox['values'] = ['Bar Graph', 'Line Plot', 'Histogram', 'Scatter Plot']
+        self.graph_combobox['values'] = ['Bar Graph', 'Line Plot', 'Scatter Plot'] #'Histogram', 'Scatter Plot'
         graph_label.pack(pady=20)
         self.graph_combobox.pack()
 
@@ -178,7 +179,16 @@ class DataExplorationPage(tk.Frame):
                 y_attribute
             )
             self.current_canvas.pack(pady=5)
-
+        elif self.current_graph == 'Scatter Plot':
+            x_attribute = self.x_axis_var.get()
+            y_attribute = self.y_axis_var.get()
+            selected_sub_values = self.get_selected_sub_values()
+            self.current_canvas = self.graph_controller.plot_scatter_plot(
+                self.left_frame,
+                x_attribute,
+                y_attribute
+            )
+            self.current_canvas.pack(pady=5)
     def get_selected_sub_values(self):
         selected_indices = self.x_sub_listbox.curselection()
         selected_sub_values = [self.x_sub_listbox.get(idx) for idx in selected_indices]
@@ -189,9 +199,11 @@ class DataExplorationPage(tk.Frame):
         if hasattr(self, 'sub_frame'):
             self.sub_frame.pack_forget()
 
+
         self.current_graph = self.graph_combobox_var.get()
-        x_axis = ['genres', 'original_language']
+        x_axis = ['genres', 'release_year', 'original_language']
         y_axis = ['revenue', 'budget', 'profit']
+        num_att = ['revenue', 'budget', 'profit', 'release_year']
         self.sub_frame = tk.Frame(self.right_frame)
         self.x_axis_var = tk.StringVar()
         self.y_axis_var = tk.StringVar()
@@ -204,6 +216,7 @@ class DataExplorationPage(tk.Frame):
         self.x_sub_values = {
             'genres': self.df_sep_genres['genres'].unique(),
             'original_language': self.df['original_language'].unique(),
+            'release_year': self.df['release_year'].sort_values().unique()
         }
 
         self.x_sub_list_var = tk.Variable()
@@ -213,6 +226,7 @@ class DataExplorationPage(tk.Frame):
         self.y_axis_combobox = ttk.Combobox(self.sub_frame, textvariable=self.y_axis_var, width=42,
                                             font=self.font_combo)
         self.x_axis_combobox['values'] = x_axis
+
         self.y_axis_combobox['values'] = y_axis
 
         # Add labels between the comboboxes
@@ -221,18 +235,20 @@ class DataExplorationPage(tk.Frame):
 
         ttk.Label(self.sub_frame, text="Y Axis:").pack()
         self.y_axis_combobox.pack()
-        ttk.Label(self.sub_frame, text="Sub-Values:").pack()
-        self.x_sub_listbox.pack()
+        if self.current_graph == "Bar Graph" or self.current_graph == 'Line Plot':
+            ttk.Label(self.sub_frame, text="Sub-Values:").pack()
+            self.x_sub_listbox.pack()
+        else:
+            self.x_axis_combobox['values'] = num_att
+            self.y_axis_combobox['values'] = num_att
 
         self.show_graph_button = ttk.Button(self.sub_frame, text="Show Graph",
                                             command=self.show_graph)  # Changed button name
 
         self.show_graph_button.pack()
+        self.sub_frame.pack()
 
         # Pack the sub_frame if the current graph type requires it
-        if self.current_graph == "Bar Graph" or self.current_graph == 'Line Plot':
-            self.sub_frame.pack()
-
     def sub_menu_handler(self, *args):
         current_x = self.x_axis_var.get()
         if current_x in self.x_sub_values:
@@ -243,6 +259,10 @@ class DataExplorationPage(tk.Frame):
 
     def update_selected_sub_values(self, event=None):
         self.selected_genre = self.get_selected_sub_values()
+        if self.x_axis_var.get() == 'release_year':
+            self.x_sub_listbox['selectmode'] = tk.EXTENDED
+        else:
+            self.x_sub_listbox['selectmode'] = tk.MULTIPLE
 
 
 

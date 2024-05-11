@@ -140,10 +140,10 @@ class StorytellingGraph:
         fig = Figure(figsize=(10, 6))
         ax = fig.add_subplot(111)
 
-        self.df_by_lang.loc[:, 'year'] = self.df_by_lang['release_date'].dt.year
+        # self.df_by_lang.loc[:, 'year'] = self.df_by_lang['release_date'].dt.year
 
         # Plot line plot
-        sns.lineplot(x='year', y='revenue', data=self.df_by_lang, color='skyblue', ax=ax)
+        sns.lineplot(x='release_year', y='revenue', data=self.df_by_lang, color='skyblue', ax=ax)
         ax.set_xlabel('Year')
         ax.set_ylabel('Average Revenue')
         ax.set_title('Average Revenue Trend Over the Years')
@@ -166,12 +166,7 @@ class ExplorationGraph:
         self.df = self.db.get_orig_df()
         self.df_sep_genres = self.db.get_separated_genres(self.df)
         self.parent = parent
-
-    def plot_bar_graph(self, root, x_attribute, x_sub_var, y_attribute):
-        # Create a new figure
-        fig = Figure(figsize=(10, 6))
-        ax = fig.add_subplot(111)
-
+    def group_data(self,x_attribute, x_sub_var, y_attribute):
         if x_attribute == 'genres' and isinstance(x_sub_var, list) and len(x_sub_var) > 0:
             # Filter the dataframe to include only the selected genres
             grouped_data = self.df_sep_genres[self.df_sep_genres['genres'].isin(x_sub_var)]
@@ -181,9 +176,34 @@ class ExplorationGraph:
         elif x_attribute == 'genres':
             # Plot all genres
             grouped_data = self.df_sep_genres
+        elif x_attribute == 'original_language' and isinstance(x_sub_var, list) and len(x_sub_var) > 0:
+            # Filter the dataframe to include only the selected genres
+            grouped_data = self.df_sep_genres[self.df_sep_genres['original_language'].isin(x_sub_var)]
+        elif x_attribute == 'original_language' and isinstance(x_sub_var, str):
+            # Filter the dataframe to include only the selected genre
+            grouped_data = self.df_sep_genres[self.df_sep_genres['original_language'] == x_sub_var]
+
+        elif x_attribute == 'release_year' and isinstance(x_sub_var, list) and len(x_sub_var) > 0:
+            # Convert list elements to integers
+            x_sub_var = [int(year) for year in x_sub_var]
+            # Filter the dataframe to include only the selected years
+            grouped_data = self.df[self.df['release_year'].isin(x_sub_var)]
+        elif x_attribute == 'release_year' and isinstance(x_sub_var, str):
+            # Filter the dataframe to include only the selected year
+            grouped_data = self.df[self.df['release_year'] == int(x_sub_var)]
         else:
             # Group by the x_attribute and calculate the mean of the y_attribute
             grouped_data = self.df.groupby(x_attribute)[y_attribute].mean().reset_index()
+
+
+        return grouped_data
+
+    def plot_bar_graph(self, root, x_attribute, x_sub_var, y_attribute):
+        # Create a new figure
+        fig = Figure(figsize=(10, 6))
+        ax = fig.add_subplot(111)
+        grouped_data = self.group_data(x_attribute, x_sub_var, y_attribute)
+
 
         # Plot the bar graph
         sns.barplot(x=x_attribute, y=y_attribute, data=grouped_data, ax=ax)
@@ -207,25 +227,8 @@ class ExplorationGraph:
         # Create a new figure
         fig = Figure(figsize=(10, 6))
         ax = fig.add_subplot(111)
+        grouped_data = self.group_data(x_attribute, x_sub_var, y_attribute)
 
-        if x_attribute == 'genres' and isinstance(x_sub_var, list) and len(x_sub_var) > 0:
-            # Filter the dataframe to include only the selected genres
-            grouped_data = self.df_sep_genres[self.df_sep_genres['genres'].isin(x_sub_var)]
-        elif x_attribute == 'genres' and isinstance(x_sub_var, str):
-            # Filter the dataframe to include only the selected genre
-            grouped_data = self.df_sep_genres[self.df_sep_genres['genres'] == x_sub_var]
-        elif x_attribute == 'original_language' and isinstance(x_sub_var, list) and len(x_sub_var) > 0:
-            # Filter the dataframe to include only the selected languages
-            grouped_data = self.df[self.df['original_language'].isin(x_sub_var)]
-        elif x_attribute == 'original_language' and isinstance(x_sub_var, str):
-            # Filter the dataframe to include only the selected language
-            grouped_data = self.df[self.df['original_language'] == x_sub_var]
-        elif x_attribute == 'genres':
-            # Plot all genres
-            grouped_data = self.df_sep_genres
-        else:
-            # Group by the x_attribute and calculate the mean of the y_attribute
-            grouped_data = self.df.groupby(x_attribute)[y_attribute].mean().reset_index()
 
         # Plot the line plot
         sns.lineplot(x=x_attribute, y=y_attribute, data=grouped_data, ax=ax)
@@ -235,6 +238,25 @@ class ExplorationGraph:
         ax.grid(True)
         if len(ax.get_xticks()) > 9:
             ax.tick_params(axis='x', rotation=30, labelsize=8)
+
+        # Create a canvas widget for displaying the plot
+        canvas = FigureCanvasTkAgg(fig, master=root)
+        canvas.draw()
+        canvas_widget = canvas.get_tk_widget()
+
+        return canvas_widget
+
+    def plot_scatter_plot(self, root, x_attribute, y_attribute, transparency=0.5):
+        # Create a new figure
+        fig = Figure(figsize=(10, 6))
+        ax = fig.add_subplot(111)
+
+        # Plot the scatter plot with transparency
+        ax.scatter(self.df[x_attribute], self.df[y_attribute], alpha=transparency)
+        ax.set_xlabel(x_attribute.capitalize())
+        ax.set_ylabel(y_attribute.capitalize())
+        ax.set_title(f'Scatter Plot of {y_attribute.capitalize()} vs {x_attribute.capitalize()}')
+        ax.grid(True)
 
         # Create a canvas widget for displaying the plot
         canvas = FigureCanvasTkAgg(fig, master=root)
